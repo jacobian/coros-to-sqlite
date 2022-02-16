@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 from typer import Option, Argument, Typer
 from .coros import CorosClient
+import sqlite_utils
 
 cli = Typer()
 
@@ -39,8 +40,12 @@ def activities(
         help="path to read auth data from (create with `coros-to-sqlite auth`)",
     ),
 ):
+
+    db = sqlite_utils.Database(database)
+
     auth_data = json.loads(auth.read_text())["coros"]
     coros = CorosClient(
         email=auth_data["email"], password_md5=auth_data["password_md5"]
     )
-    print("ok")
+    activities = coros.activities()
+    db["activities"].upsert_all(activities, pk="labelId", alter=True)
