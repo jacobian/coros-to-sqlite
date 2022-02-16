@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "coros-to-sqlite"
+version = "0.1.0"
+description = ""
+authors = ["Jacob Kaplan-Moss <jacob@jacobian.org>"]
+
+[tool.poetry.scripts]
+coros-to-sqlite = "coros_to_sqlite.cli:cli"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+typer = "^0.4.0"
+sqlite-utils = "^3.23"
+requests = "^2.27.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
