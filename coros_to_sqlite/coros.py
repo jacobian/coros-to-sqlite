@@ -1,5 +1,17 @@
-from typing import Any, Generator
+from typing import Any, Iterable, TypedDict
 import requests
+
+
+class ActivitySummary(TypedDict, total=False):
+    """
+    Activity dict returned by activity list view.
+
+    Only has fields specified for the ones that are important to pass to
+    activity_detail.
+    """
+
+    labelId: str
+    sportType: int
 
 
 class CorosClient:
@@ -21,7 +33,7 @@ class CorosClient:
         response.raise_for_status()
         self.session.headers["accessToken"] = response.json()["data"]["accessToken"]
 
-    def activities(self) -> Generator[dict[str, Any]]:
+    def activities(self) -> Iterable[ActivitySummary]:
         endpoint = "https://teamapi.coros.com/activity/query"
         query = {"size": 100, "pageNumber": 1}
 
@@ -29,14 +41,14 @@ class CorosClient:
             resp = self.session.get(endpoint, params=query)
             resp.raise_for_status()
             data = resp.json()["data"]
-            yield from data["dataList"]
+            yield from map(ActivitySummary, data["dataList"])
             if data["totalPage"] <= query["pageNumber"]:
                 break
             query["pageNumber"] += 1
 
-    def activity_detail(self, label_id: str, sport_type: int) -> dict[str, Any]:
-        endpoint = "https://teamapi.coros.com/activity/query"
-        query = {"size": 100, "pageNumber": 1}
+    def activity_detail(self, activity: ActivitySummary) -> dict[str, Any]:
+        endpoint = "https://teamapi.coros.com/activity/detail/query"
+        query = {"labelId": activity["labelId"], "sportType": activity["sportType"]}
 
         # NB: yes, this a POST for whatever reason
         resp = self.session.post(endpoint, params=query)
