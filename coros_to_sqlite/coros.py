@@ -1,3 +1,4 @@
+from typing import Any, Generator
 import requests
 
 
@@ -20,7 +21,7 @@ class CorosClient:
         response.raise_for_status()
         self.session.headers["accessToken"] = response.json()["data"]["accessToken"]
 
-    def activities(self):
+    def activities(self) -> Generator[dict[str, Any]]:
         endpoint = "https://teamapi.coros.com/activity/query"
         query = {"size": 100, "pageNumber": 1}
 
@@ -32,3 +33,12 @@ class CorosClient:
             if data["totalPage"] <= query["pageNumber"]:
                 break
             query["pageNumber"] += 1
+
+    def activity_detail(self, label_id: str, sport_type: int) -> dict[str, Any]:
+        endpoint = "https://teamapi.coros.com/activity/query"
+        query = {"size": 100, "pageNumber": 1}
+
+        # NB: yes, this a POST for whatever reason
+        resp = self.session.post(endpoint, params=query)
+        resp.raise_for_status()
+        return resp.json()["data"]
